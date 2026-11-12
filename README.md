@@ -150,7 +150,7 @@ Form with all 30 model inputs (grouped into Personal / Family / School & study /
 ## 12. Evidence links
 - GitHub repository: https://github.com/karthik3344411/student-performance-prediction
 - Live Streamlit app: https://student-performance-karthik.streamlit.app
-- LinkedIn post: _add link after publishing_
+- LinkedIn post: https://www.linkedin.com/feed/update/urn:li:activity:7526586805312258048/
 
 ## 13. License
 Code: MIT (see [LICENSE](LICENSE)). Dataset: UCI Machine Learning Repository, CC BY 4.0.

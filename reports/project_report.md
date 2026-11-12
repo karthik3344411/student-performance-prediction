@@ -15,6 +15,7 @@
 | **Course code / title** | CSE570 – Machine Learning with Python |
 | **GitHub repository** | https://github.com/karthik3344411/student-performance-prediction |
 | **Live web app** | https://student-performance-karthik.streamlit.app |
+| **LinkedIn post** | https://www.linkedin.com/feed/update/urn:li:activity:7526586805312258048/ |
 | **Date of submission** | 12 November 2026 |
 
 </div>
@@ -34,47 +35,49 @@
 12. [GitHub & LinkedIn Evidence](#12-github-linkedin-evidence)
 
 ## 2. Abstract
-This project builds an end-to-end machine-learning system that estimates a secondary-school student's final Mathematics grade (G3, scale 0–20) from 30 demographic, family, school and lifestyle attributes of the UCI *Student Performance* dataset (395 students). Earlier period grades (G1, G2) are deliberately excluded so that the model shows what can be predicted from background information alone. After the data was audited and cleaned, exploratory analysis with hypothesis tests showed that past class failures are the strongest single correlate of the final grade (Spearman ρ = −0.36). It also revealed that all 38 students with G3 = 0 have zero recorded absences, which suggests they did not sit the final exam. Five regression pipelines (mean baseline, Linear, Ridge, Decision Tree and Random Forest) were compared with 5-fold cross-validation on the training set and evaluated once on a held-out test set. A Random Forest tuned with GridSearchCV performed best: test MAE 3.04, RMSE 3.76 and R² 0.31, compared with 3.65, 4.55 and −0.01 for the baseline. The final pipeline is saved with Joblib and served through a Streamlit web application. An optional pass/fail classification experiment is also reported. The results show that background data gives a useful but coarse estimate of performance, and that the largest errors come from students who probably dropped out.
+Schools usually learn which students are struggling only when the final results arrive. In this project I wanted to see how well a machine-learning model could estimate a student's final Mathematics grade (G3, on a 0–20 scale) from background information alone. I used the UCI Student Performance dataset, which describes 395 Portuguese secondary-school students through 30 attributes about family, school, study habits and lifestyle. I deliberately left out the two earlier period grades, G1 and G2, because they are almost identical to the final grade and would make the task trivial. Exploring the data showed that past class failures had the strongest link with the final grade (Spearman ρ = −0.36). It also revealed that every one of the 38 students with a final grade of 0 had zero recorded absences, which suggests they never sat the final exam. I compared five regression models using 5-fold cross-validation and tuned the best one, a Random Forest, with GridSearchCV. On a held-out test set it reached MAE 3.04, RMSE 3.76 and R² 0.31, against 3.65, 4.55 and −0.01 for a simple baseline. The final model runs inside a public Streamlit web app. Overall, background data gives a useful but rough estimate, and students who drop out are the hardest to predict.
 
 **Keywords:** educational data mining, regression, random forest, cross-validation, scikit-learn pipeline, Streamlit
 
 ## 3. Introduction & Problem Statement
 
 ### 3.1 Introduction
-Academic performance in core subjects such as Mathematics strongly affects students' future options. If a school can recognise students who are likely to struggle early, teachers can offer tutoring, counselling or other support before the final exam. Machine learning can learn patterns from historical records, for example that students with previous failures tend to score lower, and apply them to new students. This report documents the complete workflow, from problem definition to a deployed web application. Every number in it was produced by the code in the GitHub repository; nothing was entered by hand.
+Mathematics is one of those subjects where falling behind early tends to snowball. If a teacher could tell, a few months before the final exam, which students are likely to score poorly, there would still be time for extra classes or a conversation with the student. Machine learning is a natural fit for this, because the school already has records of past students and their results, and a model can pick up patterns in them that are hard to see by eye.
+
+That was the starting point for this project. I built the whole pipeline myself: choosing the dataset, cleaning it, exploring it, training and comparing models, and finally putting the best one into a small web app that anyone can try. All the numbers in this report come straight from the code in my GitHub repository; I did not type any result in by hand.
 
 ### 3.2 Problem statement
 
 | Item | Description |
 |---|---|
-| **Context** | Portuguese secondary-school students (two schools) taking Mathematics. Teachers need an early indication of which students may perform poorly. |
-| **Target variable** | `G3` – final Mathematics grade, an integer from 0 to 20 (≥ 10 is a pass). |
-| **ML task** | **Supervised regression** (predict a numeric grade). An optional binary classification (pass/fail) is reported as an extension. |
-| **Inputs** | 30 attributes covering demographics, family background, school, study habits and lifestyle. **G1 and G2 are excluded.** |
-| **Success criteria** | (1) The final model beats a mean-predicting baseline on **both MAE and RMSE**, in cross-validation **and** on the held-out test set; (2) there is no data leakage (all preprocessing is fitted on training data only); (3) a working application returns a prediction in the valid range 0–20. |
-| **Assumptions** | Historical records represent future students in the same schools; survey answers are reasonably truthful. |
-| **Constraints** | Small dataset (395 rows); beginner-friendly, explainable methods; must run on a normal Windows laptop; academic demonstration only. |
+| **Context** | Students at two Portuguese secondary schools taking Mathematics. Teachers would like an early warning about who might do badly. |
+| **Target variable** | `G3`, the final Mathematics grade, a whole number from 0 to 20 (10 or more is a pass). |
+| **ML task** | **Supervised regression**, since the target is a number. As an extra experiment I also tried pass/fail classification. |
+| **Inputs** | 30 attributes covering the student's background, family, school, study habits and lifestyle. **G1 and G2 are not used.** |
+| **Success criteria** | (1) The final model must beat a "predict the average" baseline on **both MAE and RMSE**, in cross-validation **and** on the test set. (2) No data leakage: every preprocessing step is learned from training data only. (3) A working app that always returns a grade between 0 and 20. |
+| **Assumptions** | Past students are reasonably similar to future ones at the same schools, and the survey answers are mostly honest. |
+| **Constraints** | Only 395 students; methods had to stay simple enough for me to explain in a viva; everything had to run on an ordinary Windows laptop. This is an academic exercise, not a tool for real decisions. |
 
-**Why exclude G1 and G2?** They are the first- and second-period grades of the same course, and their Pearson correlations with G3 are 0.80 and 0.90 (Figure 10). Including them would give a high R² simply because "the final grade is close to the previous grade". Such a model would only be usable late in the school year and would hide which background factors matter.
+**Why I dropped G1 and G2.** These are the first- and second-period grades from the same school year, and they correlate 0.80 and 0.90 with G3 (Figure 10). With them in the model, R² shoots up, but only because the model learns that "the final grade is roughly the last grade". That is not very helpful: by the time G2 is known, the year is almost over. Without them, the model has to rely on background factors, which is the more interesting and more useful question.
 
 ### 3.3 Objectives
-1. Load and audit the official UCI dataset (shape, data types, missing values, duplicates).
-2. Clean and preprocess the data without data leakage (encoding, scaling, and a train/test split inside pipelines).
-3. Perform univariate, bivariate and multivariate EDA with descriptive statistics and statistical tests.
-4. Train a baseline and at least three regression models, and compare them with MAE, MSE, RMSE and R².
-5. Tune the best model with GridSearchCV, using cross-validation on the training data only.
-6. Interpret the final model (feature importance, residuals) and state its limitations.
-7. Save the complete pipeline and build a Streamlit application for predictions.
+1. Load the official UCI data and check its quality (types, missing values, duplicates).
+2. Clean and prepare the data without leaking any test information into training.
+3. Explore the data with summary statistics, charts and hypothesis tests.
+4. Train a baseline plus at least three regression models and compare them on MAE, MSE, RMSE and R².
+5. Tune the best model with GridSearchCV, using only the training data.
+6. Understand what the final model relies on and where it goes wrong.
+7. Save the full pipeline and build a Streamlit app around it.
 
 ### 3.4 Scope
-- **In scope:** the Mathematics file (`student-mat.csv`); regression of G3 from 30 non-grade features; classical scikit-learn models; a Streamlit app (runs locally and is hosted publicly on Streamlit Community Cloud); an optional pass/fail classification experiment.
-- **Out of scope:** the Portuguese-language file, deep learning, and any use for real decisions about students.
+- **In scope:** the Mathematics file (`student-mat.csv`); predicting G3 from the 30 non-grade features; standard scikit-learn models; a Streamlit app that runs locally and is also hosted publicly on Streamlit Community Cloud; an optional pass/fail experiment.
+- **Out of scope:** the Portuguese-language file, deep learning, and any real-world use for decisions about individual students.
 
 ### 3.5 Applications
-- **Early-warning support:** helping teachers and counsellors decide which students to check on first.
-- **Resource planning:** estimating how many students may need tutoring in a class.
-- **Education analytics:** understanding which background factors are associated with performance.
-- **Teaching:** a complete, reproducible example of an ML workflow (pipelines, cross-validation, tuning, deployment).
+- **Early warning:** giving teachers a short list of students who might need a check-in.
+- **Planning support:** roughly estimating how many students in a class may need tutoring.
+- **Understanding factors:** seeing which background factors go together with lower or higher grades.
+- **Learning resource:** the repository works as a complete, reproducible example of an ML project, from raw data to a deployed app.
 
 ## 4. Dataset Description
 
@@ -84,15 +87,15 @@ Academic performance in core subjects such as Mathematics strongly affects stude
 | Source | https://archive.ics.uci.edu/dataset/320/student+performance |
 | Citation | Cortez, P. & Silva, A. (2008) [1], [2] |
 | License | Creative Commons Attribution 4.0 (CC BY 4.0) |
-| File used | `student-mat.csv` (Mathematics course), separator `;` |
-| Size | **395 records × 33 columns** (30 input attributes + G1, G2, G3) |
-| Feature types | 13 numeric (mostly ordinal scales) + 17 categorical (4 nominal multi-class, 13 binary) |
+| File used | `student-mat.csv` (Mathematics course), separated by `;` |
+| Size | **395 records × 33 columns** (30 inputs + G1, G2, G3) |
+| Feature types | 13 numeric (mostly ordinal scales) and 17 categorical (4 with several categories, 13 yes/no or two-valued) |
 | Missing values / duplicates | **0 / 0** |
-| Target variable | **G3** (0–20): mean 10.42, median 11, std 4.58, 95% CI of the mean [9.96, 10.87] |
+| Target variable | **G3** (0–20): mean 10.42, median 11, standard deviation 4.58, 95% CI of the mean [9.96, 10.87] |
 
 ### 4.1 Target (class) distribution
 
-*Table 1. Distribution of the final grade G3 (n = 395).*
+*Table 1. How the final grade G3 is spread across the 395 students.*
 
 | G3 band | Students | Share |
 |---|---|---|
@@ -103,79 +106,80 @@ Academic performance in core subjects such as Mathematics strongly affects stude
 | 16–20 (very good / excellent) | 40 | 10.1% |
 | **Pass (G3 ≥ 10) / Fail (G3 < 10)** | **265 / 130** | **67.1% / 32.9%** |
 
-For regression the target is the numeric grade. For the optional classification task the classes are moderately imbalanced (about 2 passes for every fail).
+For the main regression task the target is simply the numeric grade. For the pass/fail experiment, the two classes are somewhat unbalanced: roughly two students pass for every one who fails.
 
 ### 4.2 Data dictionary
 
-*Table 2. Data dictionary (from the official UCI description).*
+*Table 2. Data dictionary, based on the description file supplied with the dataset.*
 
-| # | Feature | Type | Description / values |
+| # | Feature | Type | Meaning / values |
 |---|---|---|---|
 | 1 | school | binary | GP = Gabriel Pereira, MS = Mousinho da Silveira |
 | 2 | sex | binary | F = female, M = male |
 | 3 | age | numeric | 15–22 |
 | 4 | address | binary | U = urban, R = rural |
-| 5 | famsize | binary | LE3 = ≤ 3, GT3 = > 3 |
+| 5 | famsize | binary | LE3 = three or fewer, GT3 = more than three |
 | 6 | Pstatus | binary | parents living together (T) or apart (A) |
-| 7 | Medu | ordinal | mother's education: 0 none, 1 primary, 2 5th–9th grade, 3 secondary, 4 higher |
+| 7 | Medu | ordinal | mother's education: 0 none, 1 primary, 2 grades 5–9, 3 secondary, 4 higher |
 | 8 | Fedu | ordinal | father's education (same scale) |
 | 9 | Mjob | nominal | mother's job: teacher, health, services, at_home, other |
-| 10 | Fjob | nominal | father's job (same categories) |
-| 11 | reason | nominal | reason for choosing the school: home, reputation, course, other |
+| 10 | Fjob | nominal | father's job (same options) |
+| 11 | reason | nominal | why this school was chosen: home, reputation, course, other |
 | 12 | guardian | nominal | mother, father, other |
-| 13 | traveltime | ordinal | 1 < 15 min, 2 15–30 min, 3 30–60 min, 4 > 1 h |
-| 14 | studytime | ordinal | weekly study: 1 < 2 h, 2 2–5 h, 3 5–10 h, 4 > 10 h |
-| 15 | failures | numeric | past class failures (0–3; 3 means 3 or more) |
-| 16 | schoolsup | binary | extra educational support from school |
-| 17 | famsup | binary | family educational support |
+| 13 | traveltime | ordinal | 1 under 15 min, 2 15–30 min, 3 30–60 min, 4 over 1 hour |
+| 14 | studytime | ordinal | weekly study: 1 under 2 h, 2 2–5 h, 3 5–10 h, 4 over 10 h |
+| 15 | failures | numeric | past class failures (0–3, where 3 means three or more) |
+| 16 | schoolsup | binary | extra educational support from the school |
+| 17 | famsup | binary | educational support from the family |
 | 18 | paid | binary | extra paid classes in the subject |
 | 19 | activities | binary | extra-curricular activities |
-| 20 | nursery | binary | attended nursery school |
-| 21 | higher | binary | wants to take higher education |
+| 20 | nursery | binary | went to nursery school |
+| 21 | higher | binary | wants to go on to higher education |
 | 22 | internet | binary | internet access at home |
 | 23 | romantic | binary | in a romantic relationship |
-| 24 | famrel | ordinal | quality of family relationships, 1 (very bad) – 5 (excellent) |
+| 24 | famrel | ordinal | quality of family relationships, 1 (very bad) to 5 (excellent) |
 | 25 | freetime | ordinal | free time after school, 1–5 |
 | 26 | goout | ordinal | going out with friends, 1–5 |
-| 27 | Dalc | ordinal | workday alcohol consumption, 1–5 |
-| 28 | Walc | ordinal | weekend alcohol consumption, 1–5 |
-| 29 | health | ordinal | current health status, 1–5 |
-| 30 | absences | numeric | number of school absences (0–93; observed maximum 75) |
-| 31 | G1 | numeric | first-period grade, 0–20 – **not used as an input** |
-| 32 | G2 | numeric | second-period grade, 0–20 – **not used as an input** |
-| 33 | **G3** | numeric | **final grade, 0–20 – target** |
+| 27 | Dalc | ordinal | alcohol use on weekdays, 1–5 |
+| 28 | Walc | ordinal | alcohol use at weekends, 1–5 |
+| 29 | health | ordinal | current health, 1–5 |
+| 30 | absences | numeric | number of school absences (allowed 0–93; highest in the data is 75) |
+| 31 | G1 | numeric | first-period grade, 0–20 (**not used as an input**) |
+| 32 | G2 | numeric | second-period grade, 0–20 (**not used as an input**) |
+| 33 | **G3** | numeric | **final grade, 0–20 (the target)** |
 
-### 4.3 Why this dataset is appropriate
-- It is a well-documented, peer-reviewed public dataset that matches the problem exactly: real student records with a real final grade.
-- It mixes numeric, ordinal, binary and nominal features, so it exercises every preprocessing step taught in the course.
-- It has no missing values, yet it contains real data-quality issues (skewed absences, a group of zero grades) to investigate.
-- At 395 rows it trains in seconds on a laptop, but it is small enough that careful validation really matters.
+### 4.3 Why I chose this dataset
+- It is public, well documented and has been used in published research, so I could trust where it came from.
+- It matches the problem exactly: real students and their real final grades.
+- It has a healthy mix of numbers, ordered scales, yes/no answers and multi-category fields, so I had to use every preprocessing step from the course.
+- It has no missing values, but it still hides real quirks (very skewed absences and a cluster of zero grades), which made the exploration worthwhile.
+- With only 395 rows it trains in seconds, yet it is small enough that careful validation genuinely matters.
 
 ## 5. Data Preprocessing
 
-*Table 3. Cleaning and preprocessing steps.*
+*Table 3. What I checked, what I found and what I did about it.*
 
-| Step | Finding | Action |
+| Step | What I found | What I did |
 |---|---|---|
-| Loading | The file is `;`-separated and grade values are quoted (`"5"`) | `pd.read_csv(sep=";")`; pandas parses the quoted grades as integers |
-| Data types | 16 numeric and 17 text columns, all as documented | `pd.to_numeric` on numeric columns (as a safety check); spaces stripped from text columns |
-| Missing values | 0 | None needed. The code still fills numeric columns with the median and text columns with the mode, and never fills the target |
-| Duplicates | 0 exact duplicates | `drop_duplicates()` (no rows removed) |
-| Range validation | Every value lies inside its official range | `clean_data()` raises an error if any value is out of range |
-| Outliers (IQR rule) | `absences`: 15 values > 20 (max 75); `age`: one 22-year-old; `failures`: 83 flagged only because 79% of students have 0 | **Kept.** They are plausible, real observations, and tree models are robust to them |
-| G3 = 0 | 38 students (9.6%) | **Kept** as real outcomes; analysed in Section 6.4 |
-| Feature selection | G1 and G2 are strongly correlated with G3 | Excluded from the inputs (Section 3.2) |
-| Encoding | 17 categorical columns | `OneHotEncoder(handle_unknown="ignore")`: the 30 inputs become 56 model columns |
-| Scaling | 13 numeric columns on different scales (absences 0–75 vs. 1–5 scales) | `StandardScaler` (needed for Linear/Ridge, harmless for trees) |
-| Train/test split | — | 80% train (316) / 20% test (79), `random_state = 42` |
+| Loading | The file uses `;` instead of commas, and the grade values sit inside quotes (`"5"`) | Read it with `pd.read_csv(sep=";")`; pandas still reads the quoted grades as numbers |
+| Data types | 16 numeric and 17 text columns, all matching the documentation | Ran `pd.to_numeric` on the numeric columns anyway as a safety check, and trimmed spaces in text columns |
+| Missing values | None | Nothing to fix. The cleaning function would still fill numbers with the median and text with the most common value, and it never fills the target |
+| Duplicates | None | `drop_duplicates()` removed nothing |
+| Valid ranges | Every value was inside its documented range | `clean_data()` stops with an error if any value is ever out of range |
+| Outliers (IQR rule) | `absences`: 15 values above 20 (maximum 75); `age`: one student aged 22; `failures`: 83 values flagged only because 79% of students have none | **Kept them all.** They are real, believable values, and tree-based models cope well with them. Removing them would also throw away students from an already small sample |
+| G3 = 0 | 38 students (9.6%) | **Kept** as genuine outcomes, and investigated in Section 6.4 |
+| Feature selection | G1 and G2 are almost the same as G3 | Removed from the inputs (see Section 3.2) |
+| Encoding | 17 categorical columns | `OneHotEncoder(handle_unknown="ignore")`; the 30 inputs become 56 columns for the model |
+| Scaling | Numeric columns on very different scales (absences 0–75, most others 1–5) | `StandardScaler`; this matters for Linear and Ridge Regression and does no harm to tree models |
+| Train/test split | — | 80% for training (316 students), 20% for testing (79), with `random_state = 42` |
 
-**Leakage prevention.** The scaler and encoder sit inside a scikit-learn `Pipeline` together with the model, so they learn means, standard deviations and categories **only from training data**, including within each cross-validation fold. A unit test checks that the fitted scaler's means equal the training-set means.
+**Avoiding data leakage.** I put the scaler and the encoder inside a scikit-learn `Pipeline`, together with the model. This means they learn their means, standard deviations and category lists from the training data only, and during cross-validation from the training folds only. I also wrote a unit test that checks the scaler's learned means match the training-set means exactly.
 
 <div class="fig" markdown="1">
 
 ![Absences distribution](figures/04_absences_distribution.png)
 
-*Figure 4. Absences are strongly right-skewed (median 4, mean 5.7, maximum 75); the boxplot marks 15 high values as IQR outliers.*
+*Figure 4. Absences are heavily skewed to the right (median 4, mean 5.7, maximum 75). The boxplot marks 15 high values as outliers.*
 
 </div>
 
@@ -183,7 +187,7 @@ For regression the target is the numeric grade. For the optional classification 
 
 ![Outlier boxplots](figures/05_outlier_boxplots.png)
 
-*Figure 5. Outlier inspection with IQR boxplots. No values fall outside the documented ranges.*
+*Figure 5. Outlier check with IQR boxplots. No value falls outside its documented range.*
 
 </div>
 
@@ -191,7 +195,7 @@ For regression the target is the numeric grade. For the optional classification 
 
 ### 6.1 Descriptive statistics
 
-*Table 4. Descriptive statistics of the numeric variables (n = 395).*
+*Table 4. Summary statistics for the numeric columns (n = 395).*
 
 | Variable | Mean | Median | Std | Min | Max |
 |---|---|---|---|---|---|
@@ -222,11 +226,11 @@ For regression the target is the numeric grade. For the optional classification 
 
 </div>
 
-Most grades lie between 8 and 15, with a separate spike at 0 (38 students). Because of this spike the distribution is not normal (Shapiro–Wilk W = 0.93, p < 0.001), so non-parametric tests are reported alongside parametric ones.
+Most students scored between 8 and 15, but there is a separate spike at 0 made up of 38 students. That spike stops the distribution from being normal (Shapiro–Wilk W = 0.93, p < 0.001), so wherever I compared groups I also ran a non-parametric test alongside the usual one.
 
 | ![Gender](figures/02_gender_distribution.png) | ![Study time](figures/03_studytime_distribution.png) |
 |---|---|
-| *Figure 2. 208 female (53%) and 187 male (47%) students: a balanced sample.* | *Figure 3. Most students study 2–5 h per week (198); only 27 study more than 10 h.* |
+| *Figure 2. 208 female (53%) and 187 male (47%) students, a fairly even split.* | *Figure 3. Most students study 2–5 hours a week (198); only 27 study more than 10 hours.* |
 
 ### 6.3 Bivariate analysis and statistical tests
 
@@ -234,21 +238,21 @@ Most grades lie between 8 and 15, with a separate spike at 0 (38 students). Beca
 
 ![G3 by failures](figures/09_failures_vs_g3.png)
 
-*Figure 9. Final grade by number of past failures.*
+*Figure 9. Final grade grouped by the number of past failures.*
 
 </div>
 
-**Failures:** mean G3 falls from 11.25 (0 failures, n = 312) to 8.12 (1, n = 50), 6.24 (2, n = 17) and 5.69 (3+, n = 16). Kruskal–Wallis H = 53.1, **p < 0.001**. This is the strongest relationship in the data.
+**Past failures.** This was the clearest pattern in the whole dataset. Students with no previous failures averaged 11.25 (n = 312). With one failure the average dropped to 8.12 (n = 50), with two to 6.24 (n = 17), and with three or more to 5.69 (n = 16). A Kruskal–Wallis test confirms that the groups really differ (H = 53.1, **p < 0.001**).
 
 | ![G3 by study time](figures/06_g3_by_studytime.png) | ![G3 by gender](figures/07_g3_by_gender.png) |
 |---|---|
-| *Figure 6. G3 by weekly study time (orange dots = group means).* | *Figure 7. G3 by gender.* |
+| *Figure 6. G3 by weekly study time (orange dots mark the group means).* | *Figure 7. G3 by gender.* |
 
-- **Study time:** the group means are 10.05, 10.17, 11.40 and 11.26 for < 2, 2–5, 5–10 and > 10 h. The trend is upward but **not statistically significant** at α = 0.05 (one-way ANOVA F = 1.73, p = 0.161; Kruskal–Wallis p = 0.056).
-- **Gender:** male students average 10.91 and female students 9.97 (Welch t = −2.07, **p = 0.040**). The difference is small, about one grade point.
-- **Higher education vs passing:** the pass rate is 68.8% for students who want higher education (n = 375) and 35.0% for those who do not (n = 20); chi-square = 8.35, df = 1, **p = 0.004**. Only 20 students answered "no", so this estimate is uncertain.
+- **Study time.** I expected this one to matter a lot, but the effect is weaker than I thought. The group averages are 10.05, 10.17, 11.40 and 11.26 for under 2, 2–5, 5–10 and over 10 hours a week. The trend points upwards, but it is **not statistically significant** at the 5% level (ANOVA F = 1.73, p = 0.161; Kruskal–Wallis p = 0.056).
+- **Gender.** Male students averaged 10.91 and female students 9.97 (Welch t = −2.07, **p = 0.040**). The gap is real in this sample but small, about one grade point.
+- **Wanting higher education.** 68.8% of students who plan to go on to higher education passed (n = 375), compared with 35.0% of those who do not (n = 20). The chi-square test is significant (χ² = 8.35, df = 1, **p = 0.004**), although only 20 students said "no", so I would not lean too heavily on the exact numbers.
 
-*Table 5. Correlation of numeric inputs with G3 (n = 395).*
+*Table 5. Correlation of each numeric input with G3 (n = 395).*
 
 | Feature | Spearman ρ | p-value | Pearson r |
 |---|---|---|---|
@@ -266,7 +270,7 @@ Most grades lie between 8 and 15, with a separate spike at 0 (38 students). Beca
 | absences | +0.018 | 0.725 | +0.034 |
 | freetime | −0.005 | 0.921 | +0.011 |
 
-*Table 6. Group comparison: mean G3 (n) by selected categories.*
+*Table 6. Average G3 (and group size) for a few categorical features.*
 
 | Feature | Group A | Group B |
 |---|---|---|
@@ -278,7 +282,7 @@ Most grades lie between 8 and 15, with a separate spike at 0 (38 students). Beca
 | paid | yes: 10.92 (181) | no: 9.99 (214) |
 | school | GP: 10.49 (349) | MS: 9.85 (46) |
 
-Students who receive extra school support have *lower* average grades. This is most likely because support goes to students who were already struggling, a reminder that **correlation does not imply causation**.
+One result looks odd at first: students who get extra support from the school have *lower* grades. The likely explanation is that the school gives this support to students who are already struggling. It is a good reminder that a correlation on its own says nothing about cause and effect.
 
 ### 6.4 Key finding: the G3 = 0 group and absences
 
@@ -286,11 +290,13 @@ Students who receive extra school support have *lower* average grades. This is m
 
 ![Absences vs G3](figures/08_absences_vs_g3.png)
 
-*Figure 8. Absences vs final grade. Orange crosses mark the 38 students with G3 = 0.*
+*Figure 8. Absences against final grade. The orange crosses are the 38 students with G3 = 0.*
 
 </div>
 
-Across all students, absences appear unrelated to G3 (ρ = 0.02, p = 0.73). However, **all 38 students with G3 = 0 have exactly 0 recorded absences**, compared with only 21.6% of the other students. Twenty-five of them had a non-zero second-period grade, and they average 0.92 past failures against 0.27 for the rest. The most plausible explanation is that these students left the course or did not sit the final exam. **Excluding them, absences correlate negatively with G3 (ρ = −0.24, p < 0.001)**, the expected direction. This hidden pattern also explains why the Random Forest later ranks `absences` as highly important.
+When I first computed the correlation between absences and G3 over all students, it was practically zero (ρ = 0.02, p = 0.73). That surprised me, so I plotted the two against each other and noticed something strange: **every single one of the 38 students with G3 = 0 had exactly 0 absences.** Among the other students, only 21.6% had no absences at all. Twenty-five of those 38 still had a non-zero second-period grade, and on average they had more past failures (0.92) than everyone else (0.27).
+
+The most sensible reading is that these students left the course or did not turn up for the final exam. Their grade was then recorded as 0, and their absences simply stopped being counted. Once I set them aside, absences show the relationship you would expect: **more absences go with lower grades (ρ = −0.24, p < 0.001)**. This pattern also explains why the Random Forest later ranks `absences` as one of its most important inputs.
 
 ### 6.5 Multivariate analysis
 
@@ -298,24 +304,24 @@ Across all students, absences appear unrelated to G3 (ρ = 0.02, p = 0.73). Howe
 
 ![Correlation heatmap](figures/10_correlation_heatmap.png)
 
-*Figure 10. Pearson correlation heatmap of the numeric variables (G1/G2 shown for reference only).*
+*Figure 10. Pearson correlations between the numeric variables (G1 and G2 are shown for reference only).*
 
 </div>
 
-G1, G2 and G3 are very strongly inter-correlated (0.80–0.90), which justifies excluding G1 and G2. Among the inputs there are correlated pairs: Medu–Fedu (0.62), Dalc–Walc (0.65) and goout–Walc (0.42). This multicollinearity makes individual Linear Regression coefficients unstable, which is one reason Ridge Regression was also tested.
+The heatmap confirms how tightly G1, G2 and G3 are linked (0.80 to 0.90), which backs up my decision to leave G1 and G2 out. It also shows that some inputs move together: mother's and father's education (0.62), weekday and weekend alcohol use (0.65), and going out with weekend alcohol use (0.42). Correlated inputs like these make the individual coefficients of a plain linear regression unstable, which is one reason I also tried Ridge Regression.
 
 | ![Study time x gender](figures/11_g3_studytime_gender.png) | ![Higher x failures](figures/12_g3_higher_failures.png) |
 |---|---|
-| *Figure 11. Mean G3 by study time and gender, with 95% CIs.* | *Figure 12. Mean G3 by higher-education wish and past failures.* |
+| *Figure 11. Average G3 by study time and gender, with 95% confidence intervals.* | *Figure 12. Average G3 by wish for higher education and number of past failures.* |
 
-In Figure 11 the confidence intervals overlap widely, so the gender and study-time effects are small and uncertain. Figure 12 shows that failures lower the mean grade in both groups; the best combination (wants higher education, no failures, n = 305) averages 11.3.
+In Figure 11 the confidence intervals overlap heavily, so neither gender nor study time makes a large, clear difference once you look at them together. Figure 12 shows that past failures pull grades down whether or not a student wants higher education; the best-performing group (wants higher education, no failures, n = 305) averages 11.3.
 
-### 6.6 Key observations
-1. Past failures are the clearest signal of a low final grade.
-2. Mother's education, wish for higher education, going out, age, and absences (among students who sat the exam) carry weaker signals.
+### 6.6 What I took away from the EDA
+1. Past failures are the strongest warning sign of a low final grade.
+2. Mother's education, wanting higher education, going out, age, and absences (for students who sat the exam) carry weaker signals.
 3. Study time, family relationships, free time and health show little or no relationship with G3.
-4. The 38 zero grades form a separate group (probable dropouts) that distorts simple statistics.
-5. All of these are associations, not causes.
+4. The 38 zero grades behave like a separate group, probably students who dropped out, and they distort simple statistics.
+5. Everything above is an association. None of it proves that changing one factor would change a student's grade.
 
 ## 7. Methodology
 
@@ -323,66 +329,66 @@ In Figure 11 the confidence intervals overlap widely, so the gender and study-ti
 
 ![Workflow](figures/00_workflow.png)
 
-*Figure 0. Complete machine-learning workflow followed in this project.*
+*Figure 0. The complete workflow I followed in this project.*
 
 </div>
 
-1. **Data acquisition:** download the official UCI file and load it with pandas.
-2. **Audit and cleaning:** check data types, missing values, duplicates, value ranges and outliers (Section 5).
-3. **EDA:** run univariate, bivariate and multivariate analysis with statistical tests (Section 6).
-4. **Feature/target definition:** use 30 input features and set G3 as the target; G1 and G2 are dropped.
-5. **Train/test split:** 316 training and 79 test students (`random_state = 42`).
-6. **Pipeline:** a `ColumnTransformer` (`StandardScaler` + `OneHotEncoder`) followed by the model, so no data leaks from validation or test data into preprocessing.
-7. **Model comparison:** 5-fold cross-validation on the training set only; models are ranked by CV RMSE and CV MAE together.
-8. **Tuning:** `GridSearchCV` on the best model, again using training data only.
-9. **Final evaluation:** each model is evaluated **once** on the untouched test set.
-10. **Interpretation:** residual analysis, plus permutation and impurity feature importance.
-11. **Deployment:** the whole pipeline is saved with `joblib`, and a Streamlit app loads it for predictions. The app is hosted on Streamlit Community Cloud at https://student-performance-karthik.streamlit.app (Section 12.2).
+1. **Getting the data:** downloaded the official UCI file and loaded it with pandas.
+2. **Auditing and cleaning:** checked types, missing values, duplicates, value ranges and outliers (Section 5).
+3. **EDA:** single-variable, two-variable and multi-variable analysis with hypothesis tests (Section 6).
+4. **Choosing inputs and target:** 30 input features, G3 as the target, G1 and G2 removed.
+5. **Splitting:** 316 training students and 79 test students (`random_state = 42`).
+6. **Building the pipeline:** a `ColumnTransformer` (`StandardScaler` + `OneHotEncoder`) followed by the model, so that nothing from the validation or test data leaks into preprocessing.
+7. **Comparing models:** 5-fold cross-validation on the training set only, ranking models by CV RMSE and CV MAE together.
+8. **Tuning:** `GridSearchCV` on the best model, again with training data only.
+9. **Final check:** each model is scored **once** on the untouched test set.
+10. **Interpreting:** residual plots plus permutation and impurity-based feature importance.
+11. **Deploying:** the whole pipeline is saved with `joblib` and loaded by a Streamlit app, which is hosted at https://student-performance-karthik.streamlit.app (Section 12.2).
 
-**Why cross-validation?** With only 79 test students, a single split is noisy and can rank models by chance (Section 9.3 shows a real example). Making every decision with 5-fold CV and touching the test set only once gives an honest final estimate.
+**Why cross-validation matters here.** With only 79 students in the test set, a single split is noisy and can rank models by luck. Section 9.3 shows that this actually happened in my results. By making every decision with 5-fold cross-validation and touching the test set only at the very end, I get a fairer final estimate.
 
-**Software:** Python 3.10, pandas 2.3, NumPy 2.2, scikit-learn 1.7, SciPy 1.15, Matplotlib 3.10, Seaborn 0.13, Joblib 1.6, Streamlit 1.65 and pytest 9.2 (21 automated tests).
+**Tools used:** Python 3.10, pandas 2.3, NumPy 2.2, scikit-learn 1.7, SciPy 1.15, Matplotlib 3.10, Seaborn 0.13, Joblib 1.6, Streamlit 1.65 and pytest 9.2 (21 automated tests).
 
 ## 8. Model Development
 
-All models share the same preprocessing pipeline.
+Every model uses exactly the same preprocessing pipeline, so the comparison is fair.
 
-*Table 7. Models trained.*
+*Table 7. The models I trained and why.*
 
-| Model | Why it was included | Initial settings |
+| Model | Why I included it | Starting settings |
 |---|---|---|
-| **Dummy Regressor (baseline)** | Always predicts the training mean (≈ 10.4); any useful model must beat it | `strategy="mean"` |
-| **Linear Regression** | Simple, interpretable linear model | default |
-| **Ridge Regression** | Linear model with L2 regularisation; handles correlated inputs | `alpha=1.0` |
-| **Decision Tree Regressor** | Non-linear, captures interactions, easy to visualise | `random_state=42`, no depth limit |
-| **Random Forest Regressor** | Ensemble of trees that reduces the overfitting of a single tree | `n_estimators=300`, `random_state=42` |
+| **Dummy Regressor (baseline)** | Always predicts the training average (about 10.4). Any model worth using has to beat this | `strategy="mean"` |
+| **Linear Regression** | The simplest real model, and easy to interpret | default |
+| **Ridge Regression** | Linear regression with an L2 penalty, which handles correlated inputs better | `alpha=1.0` |
+| **Decision Tree Regressor** | Can capture non-linear patterns and interactions | `random_state=42`, no depth limit |
+| **Random Forest Regressor** | Averages many trees to reduce the overfitting of a single tree | `n_estimators=300`, `random_state=42` |
 
-**Training and selection.** Each pipeline was scored with 5-fold CV (MAE, RMSE, R²) on the 316 training students. The non-baseline models were ranked by CV RMSE and CV MAE, and **Random Forest** ranked first on both. R² was not used on its own, because MAE and RMSE are in grade points and are easier to explain to teachers.
+**Training and choosing a model.** I scored each pipeline with 5-fold cross-validation on the 316 training students, recording MAE, RMSE and R². I then ranked the four real models by CV RMSE and by CV MAE, and **Random Forest** came first on both. I did not choose by R² alone: MAE and RMSE are measured in grade points, which makes them much easier to explain to a teacher ("the prediction is usually about three points off").
 
-**Hyperparameter tuning.** `GridSearchCV` (5-fold CV on the training set, scored by RMSE) searched 2 × 3 × 3 × 3 = **54 combinations** (270 model fits):
+**Hyperparameter tuning.** I then used `GridSearchCV` (5-fold, scored by RMSE, training data only) to try 2 × 3 × 3 × 3 = **54 combinations**, which is 270 model fits in total:
 
-*Table 8. Random Forest hyperparameter grid.*
+*Table 8. The Random Forest settings I searched over.*
 
-| Hyperparameter | Values tried | Meaning | Best |
+| Hyperparameter | Values tried | What it controls | Best |
 |---|---|---|---|
 | `n_estimators` | 200, 500 | number of trees | **200** |
-| `max_depth` | None, 6, 10 | maximum depth of each tree | **None** |
-| `min_samples_leaf` | 1, 3, 5 | minimum number of students in a leaf | **1** |
-| `max_features` | 1.0, 0.5, "sqrt" | share of features considered at each split | **0.5** |
+| `max_depth` | None, 6, 10 | how deep each tree can grow | **None** |
+| `min_samples_leaf` | 1, 3, 5 | smallest number of students allowed in a leaf | **1** |
+| `max_features` | 1.0, 0.5, "sqrt" | share of features each split may look at | **0.5** |
 
-Tuning tested whether limiting tree depth or sampling features reduces overfitting. The best setting uses half of the features at each split, which makes the trees more diverse. The tuned model replaced the default because its **CV** RMSE was lower (3.897 vs 3.925); the test set played no part in that choice. The final pipeline is saved as `models/best_model.joblib` (4.3 MB), with its metrics in `models/model_metrics.json`.
+I wanted to see whether limiting depth or the number of features would reduce overfitting. The winning setting lets each split consider only half of the features, which makes the trees more varied. I kept the tuned version because its **cross-validation** RMSE was lower (3.897 against 3.925); the test set had no say in this choice. The final pipeline is saved as `models/best_model.joblib` (4.3 MB), and its metrics are stored in `models/model_metrics.json` for the app to display.
 
 ## 9. Results & Model Comparison
 
 ### 9.1 Evaluation metrics
-- **MAE** – mean absolute error: the average number of grade points by which a prediction is off.
-- **MSE** – mean squared error: penalises large errors more heavily.
-- **RMSE** – the square root of MSE, in grade points.
-- **R²** – the share of the variance in G3 explained by the model (0 = no better than predicting the mean; negative = worse than the mean).
+- **MAE** (mean absolute error): on average, how many grade points the prediction is off by.
+- **MSE** (mean squared error): like MAE, but large mistakes count much more.
+- **RMSE:** the square root of MSE, which brings it back to grade points.
+- **R²:** how much of the variation in G3 the model explains. 0 means no better than always guessing the average; a negative value means worse than that.
 
-### 9.2 Final model performance
+### 9.2 How the final model performed
 
-*Table 9. Final model vs baseline on the held-out test set (79 students).*
+*Table 9. Final model against the baseline on the held-out test set (79 students).*
 
 | Metric | Baseline | Final model (tuned Random Forest) | Improvement |
 |---|---|---|---|
@@ -391,9 +397,9 @@ Tuning tested whether limiting tree depth or sampling features reduces overfitti
 | RMSE | 4.550 | **3.761** | −0.79 (−17%) |
 | R² | −0.010 | **0.310** | +0.32 |
 
-### 9.3 Model comparison
+### 9.3 Comparing all the models
 
-*Table 10. All models: test set (79 students) and 5-fold cross-validation on the training set (316 students).*
+*Table 10. Every model on the test set (79 students) and in 5-fold cross-validation on the training set (316 students).*
 
 | Model | Test MAE | Test MSE | Test RMSE | Test R² | CV MAE | CV RMSE | CV R² | Train RMSE |
 |---|---|---|---|---|---|---|---|---|
@@ -402,7 +408,7 @@ Tuning tested whether limiting tree depth or sampling features reduces overfitti
 | Ridge Regression | 3.393 | 17.585 | 4.193 | 0.142 | 3.506 | 4.584 | −0.080 | 3.865 |
 | Decision Tree | 3.633 | 23.405 | 4.838 | −0.141 | 4.102 | 5.527 | −0.570 | 0.000 |
 | Random Forest | **3.010** | 14.175 | 3.765 | 0.309 | **2.934** | 3.925 | 0.212 | 1.457 |
-| **RF (tuned) – final** | 3.035 | **14.145** | **3.761** | **0.310** | 2.960 | **3.897** | **0.232** | 1.451 |
+| **RF (tuned), final** | 3.035 | **14.145** | **3.761** | **0.310** | 2.960 | **3.897** | **0.232** | 1.451 |
 
 <div class="fig" markdown="1">
 
@@ -412,32 +418,32 @@ Tuning tested whether limiting tree depth or sampling features reduces overfitti
 
 </div>
 
-- **Linear and Ridge Regression:** both beat the baseline on the test set (R² 0.14) but are *worse* than the baseline in cross-validation (CV R² < 0). A single split can mislead, which is why the models were selected with CV.
-- **Decision Tree:** its training RMSE is 0.00 but its CV RMSE is 5.53, a textbook case of **overfitting** in which the tree memorises the training students.
-- **Random Forest:** averaging many decorrelated trees greatly reduces this variance. It is the best model in CV and on the test set, and it captures non-linear patterns that linear models miss.
-- **Tuned vs default Random Forest:** tuning gave only a small improvement (CV RMSE 3.925 → 3.897; test RMSE 3.765 → 3.761, with test MAE slightly worse at 3.010 → 3.035). The two are practically equivalent; the tuned version was kept according to the pre-defined CV rule.
-- **Justification:** the tuned Random Forest has the lowest CV RMSE and the best test RMSE, MSE and R². It beats the baseline by 17% on both MAE and RMSE, which meets the success criterion.
+- **Linear and Ridge Regression.** On the test set both look better than the baseline (R² 0.14). In cross-validation, though, both are *worse* than the baseline (CV R² below 0). If I had relied on that one test split, I would have drawn the wrong conclusion, which is exactly why I made my decisions with cross-validation.
+- **Decision Tree.** It scored a perfect 0.00 RMSE on the training data but 5.53 in cross-validation. It had simply memorised the training students, a textbook example of **overfitting**.
+- **Random Forest.** Averaging many different trees fixes most of that problem. It was the best model in cross-validation and on the test set, and it can pick up non-linear patterns that the linear models miss. Its training RMSE (1.45) is still well below its CV RMSE (3.90), so some overfitting remains.
+- **Tuned vs default Random Forest.** Tuning helped only a little (CV RMSE 3.925 → 3.897). On the test set the RMSE barely moved (3.765 → 3.761), and the MAE was actually slightly worse (3.010 → 3.035). In practice the two are equally good; I kept the tuned one because that is what my cross-validation rule said to do.
+- **Why this is my final model.** The tuned Random Forest has the lowest CV RMSE and the best test RMSE, MSE and R². It improves on the baseline by 17% on both MAE and RMSE, which meets the success criterion I set at the start.
 
-### 9.4 Model behaviour
+### 9.4 Understanding the model's behaviour
 
 | ![Actual vs predicted](figures/14_actual_vs_predicted.png) | ![Residuals](figures/15_residuals.png) |
 |---|---|
-| *Figure 14. Actual vs predicted G3 (test set).* | *Figure 15. Residuals vs predictions and the residual distribution.* |
+| *Figure 14. Actual vs predicted G3 on the test set.* | *Figure 15. Residuals against predictions, and how the residuals are distributed.* |
 
-- The predictions are compressed towards the centre (about 8–14); the model avoids extreme values.
-- The residuals are centred near zero (mean −0.18). 43% of predictions are within ±2 points and 73% within ±4 points.
-- The five test students with G3 = 0 produce the largest errors (**MAE 8.06**, against **2.70** for the other 74 students).
+- The predictions bunch up in the middle (roughly 8 to 14). The model plays it safe and rarely predicts very high or very low grades.
+- The residuals are centred close to zero (mean −0.18), so the model is not consistently too high or too low. 43% of predictions are within 2 points of the real grade, and 73% within 4 points.
+- The biggest misses are the five test students whose real grade was 0. For them the average error is **8.06** points, against **2.70** for the other 74 students. From background data alone, the model cannot tell who is going to drop out.
 
 | ![Permutation importance](figures/16_permutation_importance.png) | ![Impurity importance](figures/17_tree_feature_importance.png) |
 |---|---|
-| *Figure 16. Permutation importance on the test set (increase in RMSE when a feature is shuffled).* | *Figure 17. Random Forest impurity-based importance.* |
+| *Figure 16. Permutation importance on the test set: how much the RMSE gets worse when one feature is shuffled.* | *Figure 17. The Random Forest's own impurity-based importance.* |
 
-Both methods agree that **failures** and **absences** dominate, followed by going out, gender, school support, mother's education and age. As a cross-check, the standardised Linear Regression coefficients show the same directions: failures −1.36 points per standard deviation, wanting higher education +0.88, male +0.75, study time +0.63.
+Both importance methods agree that **failures** and **absences** matter most. After those come going out, gender, school support, mother's education and age. As a cross-check, the scaled Linear Regression coefficients point in the same directions: about −1.36 grade points per standard deviation of past failures, +0.88 for wanting higher education, +0.75 for male students and +0.63 for more study time.
 
-### 9.5 Optional extension: pass/fail classification
-The target was converted to **pass (G3 ≥ 10) / fail** (67.1% pass), keeping the same features and pipeline, with a stratified 80/20 split and class-balanced models.
+### 9.5 Extra experiment: pass/fail classification
+Out of curiosity, I also turned the problem into a yes/no question: does the student **pass (G3 ≥ 10) or fail**? 67.1% of students pass. I kept the same features and pipeline, used a stratified 80/20 split, and set the models to balance the two classes.
 
-*Table 11. Pass/fail classification on the test set (precision, recall and F1 are for the "fail" class).*
+*Table 11. Pass/fail results on the test set (precision, recall and F1 are for the "fail" class).*
 
 | Model | CV macro-F1 | Accuracy | Precision | Recall | F1 | Macro-F1 | ROC-AUC |
 |---|---|---|---|---|---|---|---|
@@ -448,29 +454,29 @@ The target was converted to **pass (G3 ≥ 10) / fail** (67.1% pass), keeping th
 
 | ![Confusion matrix](figures/18_confusion_matrix.png) | ![ROC curves](figures/19_roc_curves.png) |
 |---|---|
-| *Figure 18. Confusion matrix for Logistic Regression: 12 of 26 failing students detected.* | *Figure 19. ROC curves of the three classifiers.* |
+| *Figure 18. Confusion matrix for Logistic Regression: it caught 12 of the 26 failing students.* | *Figure 19. ROC curves for the three classifiers.* |
 
-The baseline has the highest accuracy while detecting **no** failing students, which shows why accuracy alone is misleading on imbalanced classes. All classifiers are only moderately better than chance (ROC-AUC 0.47–0.65), consistent with the regression results.
+The most useful lesson here was about accuracy. The baseline that always says "pass" has the highest accuracy of all (0.67), yet it does not catch a single failing student. When the classes are unbalanced, recall and F1 for the smaller class tell you far more. All the classifiers are only moderately better than chance (ROC-AUC 0.47 to 0.65), which matches what the regression results already showed.
 
 ## 10. Conclusion & Limitations
 
 ### 10.1 Conclusion
-This project delivers a complete, reproducible machine-learning workflow for predicting students' final Mathematics grades from background information. A tuned Random Forest was selected through a fair, leakage-free comparison of five models (test MAE 3.04, RMSE 3.76, R² 0.31). It clearly outperforms the baseline, the linear models and the single decision tree. Past failures and absences are the most important predictors. The analysis also revealed that students with a final grade of 0 form a distinct group that the model cannot predict well. The trained pipeline is deployed as a public Streamlit web application (https://student-performance-karthik.streamlit.app). The model can serve as a rough, explainable early-warning signal, but its moderate accuracy means it should support teachers' judgement, never replace it.
+I built a complete, reproducible machine-learning project that estimates a student's final Mathematics grade from background information, without looking at earlier exam marks. After a fair, leakage-free comparison of five models, a tuned Random Forest came out on top (test MAE 3.04, RMSE 3.76, R² 0.31), clearly ahead of the baseline, the linear models and a single decision tree. Past failures and absences turned out to be the most important factors. The most interesting discovery was the group of students with a final grade of 0, who look like students who dropped out; they behave very differently from everyone else, and the model struggles to predict them. The finished model is available as a public Streamlit web app (https://student-performance-karthik.streamlit.app). In its current form it could serve as a rough, explainable early-warning signal. Its accuracy is modest, though, so it should only ever support a teacher's judgement, never replace it.
 
 ### 10.2 Limitations
-- **Small sample:** only 395 students (79 in the test set), so the metrics carry noticeable uncertainty (CV RMSE standard deviation ≈ 0.37).
-- **Limited scope:** two Portuguese schools, one subject, and data from 2005–2006; the results may not transfer elsewhere.
-- **Self-reported, sensitive features:** alcohol use and family information may be inaccurate, and using gender or background for decisions raises fairness concerns.
-- **G3 = 0 group:** probable dropouts are mixed with genuine low scores in a single numeric target.
-- **Moderate accuracy:** R² ≈ 0.31, and the predictions are compressed towards the average.
-- **Associations, not causes:** no relationship found here proves that changing a feature would change the grade.
+- **Small sample.** 395 students, with only 79 in the test set, so the numbers carry real uncertainty (the CV RMSE varies by about ±0.37 between folds).
+- **Narrow setting.** Two schools in Portugal, one subject, data from 2005–2006. The results may not hold elsewhere or today.
+- **Self-reported, sensitive data.** Answers about alcohol or family life may not be accurate, and using things like gender or family background to make decisions about a student raises fairness concerns.
+- **The G3 = 0 group.** Students who probably dropped out are mixed in with genuinely low scores under one numeric target.
+- **Modest accuracy.** R² is about 0.31, and the predictions are pulled towards the average.
+- **Associations, not causes.** Nothing here shows that changing a factor, such as study time, would change a student's grade.
 
 ### 10.3 Future improvements
-- Model the G3 = 0 outcome separately (a dropout classifier plus a grade regressor for students who sit the exam).
-- Combine the Mathematics and Portuguese datasets (649 more students).
-- Try gradient boosting and SHAP explanations, and use repeated or nested cross-validation.
-- Run a fairness audit of errors by gender, address and school.
-- Add K-Means clustering with PCA (syllabus Unit V) to explore student profiles.
+- Treat the G3 = 0 students separately: first predict who is likely to drop out, then predict the grade for everyone else.
+- Add the Portuguese-language file (649 more students) to get more training data.
+- Try gradient-boosting models and SHAP explanations, and use repeated or nested cross-validation for steadier estimates.
+- Check whether the model's errors differ between groups, such as gender, address and school, before any real use.
+- Add K-Means clustering with PCA (syllabus Unit V) to look for natural student profiles.
 
 ## 11. References
 1. P. Cortez and A. Silva, "Using Data Mining to Predict Secondary School Student Performance," in *Proc. 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008)*, Porto, Portugal: EUROSIS, 2008, pp. 5–12.
@@ -487,12 +493,17 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 
 ## 12. GitHub & LinkedIn Evidence
 
-### 12.1 GitHub repository
-- **Repository URL:** https://github.com/karthik3344411/student-performance-prediction
-- **Contents:** README, problem/objectives, dataset source, Python scripts (`src/`), executed notebook, `requirements.txt`, saved model, figures, this report, viva questions, and 21 automated tests.
-- **Workflow:** branch-based development, with one feature branch and one pull request per development phase.
+| Evidence | Link |
+|---|---|
+| **GitHub repository** | https://github.com/karthik3344411/student-performance-prediction |
+| **Live Streamlit app** | https://student-performance-karthik.streamlit.app |
+| **LinkedIn post** | https://www.linkedin.com/feed/update/urn:li:activity:7526586805312258048/ |
 
-*Table 12. Pull requests (opened 12 Nov 2026).*
+### 12.1 GitHub repository
+- **What it contains:** README, problem and objectives, dataset source, Python scripts (`src/`), the executed notebook, `requirements.txt`, the saved model, all figures, this report, viva questions and 21 automated tests.
+- **How I worked:** branch-based development, with one feature branch and one pull request for each stage of the project.
+
+*Table 12. Pull requests (opened 12 November 2026).*
 
 | PR | Branch | Title |
 |---|---|---|
@@ -504,7 +515,7 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 | #6 | docs/notebook-report-readme | Phase 9: Notebook, README, academic report and viva preparation |
 | #7 | docs/pdf-report | Final report in CSE570 format (PDF) with GitHub evidence |
 
-*Table 13. Commit history (all commits authored by karthik3344411 on 12 Nov 2026).*
+*Table 13. Commit history (all commits by karthik3344411, 12 November 2026).*
 
 | Commit | Message |
 |---|---|
@@ -524,12 +535,21 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 | 1bd7adb | Write full README with setup, usage, results and limitations |
 | 7343341 | Add academic project report with real results and references |
 | 0b88e50 | Add viva preparation questions and answers |
+| 3727b52 | Add workflow flowchart figure for the methodology section |
+| 398b602 | Add dated GitHub evidence screenshots (repository, pull requests, commits) |
+| 254e88e | Restructure report into the 12-section CSE570 report format |
+| 228c748 | Add PDF build script and generated Project_Report.pdf |
+| 91ba7db | Add student registration number, roll number and section to the title page |
+| b9efef1 | Finalize report: remove faculty and LinkedIn placeholders |
+| 5bd93e3 | Replace deprecated use_container_width with width='stretch' for Streamlit Cloud |
+| 4835771 | Split requirements: lean runtime list for Streamlit Cloud, dev tools in requirements-dev.txt |
+| 420b3f3 | Add live Streamlit Cloud app link and screenshot to README and report |
 
 <div class="fig" markdown="1">
 
 ![GitHub repository](evidence/github_repository.png)
 
-*Figure 20. Repository home page (screenshot captured 12 Nov 2026, 14:07 IST).*
+*Figure 20. Repository home page (screenshot taken 12 November 2026, 14:07 IST).*
 
 </div>
 
@@ -537,7 +557,7 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 
 ![GitHub pull requests](evidence/github_pull_requests.png)
 
-*Figure 21. Pull requests, one per development phase (screenshot captured 12 Nov 2026, 14:07 IST).*
+*Figure 21. Pull requests, one for each stage of the project (screenshot taken 12 November 2026, 14:07 IST).*
 
 </div>
 
@@ -545,20 +565,31 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 
 ![GitHub commits](evidence/github_commits.png)
 
-*Figure 22. Commit history with descriptive messages (screenshot captured 12 Nov 2026, 14:07 IST).*
+*Figure 22. Commit history with descriptive messages (screenshot taken 12 November 2026, 14:07 IST).*
 
 </div>
 
-### 12.2 Live Streamlit web application
-- **App URL:** https://student-performance-karthik.streamlit.app
-- **Hosting:** Streamlit Community Cloud, deployed directly from the GitHub repository (`app.py`, branch `docs/pdf-report`).
-- **Features:** a validated form for all 30 model inputs, the predicted final grade with grade band and typical error range (± test MAE), the most influential features, a model-performance tab, and a dataset tab.
+### 12.2 Live Streamlit web app
+- **Link:** https://student-performance-karthik.streamlit.app
+- **Hosting:** Streamlit Community Cloud, deployed straight from the GitHub repository (`app.py`).
+- **What it does:** a form with checks on all 30 model inputs; the predicted final grade with a grade band and a typical error range (± test MAE); the most influential features; plus tabs showing model performance and dataset information.
 
 <div class="fig" markdown="1">
 
 ![Live Streamlit app](evidence/streamlit_app.png)
 
-*Figure 23. The deployed Streamlit application (screenshot captured 12 Nov 2026, 15:34 IST).*
+*Figure 23. The deployed Streamlit app (screenshot taken 12 November 2026, 15:34 IST).*
 
 </div>
 
+### 12.3 LinkedIn post
+- **Link:** https://www.linkedin.com/feed/update/urn:li:activity:7526586805312258048/
+- **What the post covers:** the problem, the dataset, my approach, the key insight (the G3 = 0 and absences finding), the best-model result (tuned Random Forest, MAE 3.04 against a baseline of 3.65), my main learning, and links to the GitHub repository and the live app.
+
+<div class="fig" markdown="1">
+
+![LinkedIn post](evidence/linkedin_post.png)
+
+*Figure 24. The published LinkedIn post (screenshot taken 12 November 2026, 15:44 IST).*
+
+</div>

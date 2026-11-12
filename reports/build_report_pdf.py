@@ -54,7 +54,8 @@ table.figs img { max-height: 80mm; }
 .title-page .subtitle { font-size: 13pt; color: #52514e; margin: 0 0 40px; text-align: center; }
 .title-page table { width: 85%; margin: 0 auto; font-size: 11pt; }
 .title-page table thead { display: none; }
-.title-page td:first-child { width: 34%; }
+.title-page td:first-child { width: 30%; white-space: nowrap; }
+.title-page td:last-child { word-break: break-all; }
 """
 
 
