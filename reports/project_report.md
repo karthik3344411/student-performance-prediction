@@ -13,9 +13,7 @@
 | **Roll number** | 37 |
 | **Section** | K3P26DS |
 | **Course code / title** | CSE570 – Machine Learning with Python |
-| **Submitted to** | _[faculty name]_ |
 | **GitHub repository** | https://github.com/karthik3344411/student-performance-prediction |
-| **LinkedIn post** | _[add link after publishing]_ |
 | **Date of submission** | 12 November 2026 |
 
 </div>
@@ -550,7 +548,3 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 
 </div>
 
-### 12.2 LinkedIn post
-- **Post URL:** _[add the LinkedIn post URL here after publishing]_
-- **Content:** problem, dataset, approach, one key insight (the G3 = 0 / absences finding, Figure 8), best-model result (tuned Random Forest, MAE 3.04 vs baseline 3.65), key learning, and the GitHub link.
-- **Dated screenshot:** _[insert a dated screenshot of the post showing likes and comments]_
