@@ -9,7 +9,7 @@ Predict a student's **final Mathematics grade (G3, 0–20)** from personal, fami
 | **Final model** | Random Forest Regressor (tuned with GridSearchCV) |
 | **Test MAE / RMSE / R²** | **3.04 / 3.76 / 0.31** (baseline: 3.65 / 4.55 / −0.01) |
 | **Dataset** | UCI Student Performance – `student-mat.csv` (395 students, 33 columns) |
-| **Report** | [reports/project_report.md](reports/project_report.md) |
+| **Report** | [PDF](reports/Project_Report.pdf) · [Markdown](reports/project_report.md) |
 | **Notebook** | [notebooks/student_performance_analysis.ipynb](notebooks/student_performance_analysis.ipynb) |
 | **Viva preparation** | [VIVA_QUESTIONS.md](VIVA_QUESTIONS.md) |
 

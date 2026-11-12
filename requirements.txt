@@ -13,3 +13,6 @@ pytest==9.2.0
 notebook==7.6.5
 ipykernel==7.3.0
 nbconvert==7.17.2
+
+# For building the PDF report (python reports/build_report_pdf.py; also needs Microsoft Edge or Chrome)
+markdown==3.10.3
