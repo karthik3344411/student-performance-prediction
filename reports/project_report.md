@@ -9,9 +9,9 @@
 | | |
 |---|---|
 | **Student name** | Dondla Karthik |
-| **Registration number** | _[fill in]_ |
-| **Roll number** | _[fill in]_ |
-| **Section** | _[fill in]_ |
+| **Registration number** | 12625778 |
+| **Roll number** | 37 |
+| **Section** | K3P26DS |
 | **Course code / title** | CSE570 – Machine Learning with Python |
 | **Submitted to** | _[faculty name]_ |
 | **GitHub repository** | https://github.com/karthik3344411/student-performance-prediction |
