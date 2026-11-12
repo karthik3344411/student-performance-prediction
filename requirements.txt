@@ -1,18 +1,12 @@
-# Tested with Python 3.10 on Windows 11
-pandas==2.3.3
-numpy==2.2.6
-matplotlib==3.10.9
-seaborn==0.13.2
-scipy==1.15.3
+# Packages needed to run the scripts and the Streamlit app.
+# Tested with Python 3.10 on Windows 11 (also used by Streamlit Community Cloud).
+# scikit-learn is pinned exactly: the saved model (models/best_model.joblib)
+# must be loaded with the same scikit-learn version it was trained with.
 scikit-learn==1.7.2
-joblib==1.6.0
 streamlit==1.65.0
-pytest==9.2.0
-
-# For opening / re-running the notebook
-notebook==7.6.5
-ipykernel==7.3.0
-nbconvert==7.17.2
-
-# For building the PDF report (python reports/build_report_pdf.py; also needs Microsoft Edge or Chrome)
-markdown==3.10.3
+pandas>=2.2,<2.4
+numpy>=2.2,<2.4
+scipy>=1.15,<1.17
+matplotlib>=3.10,<3.11
+seaborn==0.13.2
+joblib>=1.4,<2

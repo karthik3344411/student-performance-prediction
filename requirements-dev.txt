@@ -1,0 +1,8 @@
+# Extra tools for development: tests, notebook and PDF report.
+# Install with:  pip install -r requirements-dev.txt
+-r requirements.txt
+pytest==9.2.0
+notebook==7.6.5
+ipykernel==7.3.0
+nbconvert==7.17.2
+markdown==3.10.3

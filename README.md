@@ -69,7 +69,8 @@ student-performance-prediction/
 ├── tests/                        # pytest: preprocessing, prediction, app smoke test
 ├── app.py                        # Streamlit application
 ├── VIVA_QUESTIONS.md
-├── requirements.txt
+├── requirements.txt              # app + scripts
+├── requirements-dev.txt          # + pytest, notebook, PDF build
 └── LICENSE
 ```
 
@@ -79,8 +80,9 @@ git clone https://github.com/karthik3344411/student-performance-prediction.git
 cd student-performance-prediction
 python -m venv .venv
 .\.venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # everything (app + tests + notebook + PDF build)
 ```
+`requirements.txt` alone contains only what the scripts and the Streamlit app need (this is what Streamlit Community Cloud installs).
 (macOS/Linux: `source .venv/bin/activate`)
 
 ## 7. How to run
