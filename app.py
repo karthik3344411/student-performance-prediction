@@ -176,7 +176,7 @@ with tab_predict:
                 Walc = coded_select("Weekend alcohol consumption", SCALE_5, "Walc", int(d("Walc", 2)))
 
         submitted = st.form_submit_button("Predict final grade", type="primary",
-                                          use_container_width=True)
+                                          width="stretch")
 
     if submitted:
         student = {
@@ -267,7 +267,7 @@ with tab_model:
         st.markdown("#### Model comparison")
         table = pd.DataFrame(metrics["comparison"]).T[["MAE", "RMSE", "R2", "CV_MAE", "CV_RMSE", "CV_R2"]]
         table.columns = ["Test MAE", "Test RMSE", "Test R²", "CV MAE", "CV RMSE", "CV R²"]
-        st.dataframe(table.style.format("{:.3f}"), use_container_width=True)
+        st.dataframe(table.style.format("{:.3f}"), width="stretch")
         st.caption("CV = mean of 5-fold cross-validation on the training set. Lower MAE/RMSE "
                    "and higher R² are better. The baseline always predicts the training mean.")
     else:
@@ -281,7 +281,7 @@ with tab_model:
     for i, (fname, caption) in enumerate(figs):
         path = FIGURES_DIR / fname
         if path.exists():
-            cols[i % 2].image(str(path), caption=caption, use_container_width=True)
+            cols[i % 2].image(str(path), caption=caption, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Tab 3 - dataset information
