@@ -14,6 +14,7 @@
 | **Section** | K3P26DS |
 | **Course code / title** | CSE570 – Machine Learning with Python |
 | **GitHub repository** | https://github.com/karthik3344411/student-performance-prediction |
+| **Live web app** | https://student-performance-karthik.streamlit.app |
 | **Date of submission** | 12 November 2026 |
 
 </div>
@@ -66,8 +67,8 @@ Academic performance in core subjects such as Mathematics strongly affects stude
 7. Save the complete pipeline and build a Streamlit application for predictions.
 
 ### 3.4 Scope
-- **In scope:** the Mathematics file (`student-mat.csv`); regression of G3 from 30 non-grade features; classical scikit-learn models; a local Streamlit app; an optional pass/fail classification experiment.
-- **Out of scope:** the Portuguese-language file, deep learning, cloud deployment, and any use for real decisions about students.
+- **In scope:** the Mathematics file (`student-mat.csv`); regression of G3 from 30 non-grade features; classical scikit-learn models; a Streamlit app (runs locally and is hosted publicly on Streamlit Community Cloud); an optional pass/fail classification experiment.
+- **Out of scope:** the Portuguese-language file, deep learning, and any use for real decisions about students.
 
 ### 3.5 Applications
 - **Early-warning support:** helping teachers and counsellors decide which students to check on first.
@@ -336,7 +337,7 @@ In Figure 11 the confidence intervals overlap widely, so the gender and study-ti
 8. **Tuning:** `GridSearchCV` on the best model, again using training data only.
 9. **Final evaluation:** each model is evaluated **once** on the untouched test set.
 10. **Interpretation:** residual analysis, plus permutation and impurity feature importance.
-11. **Deployment:** the whole pipeline is saved with `joblib`, and a Streamlit app loads it for predictions.
+11. **Deployment:** the whole pipeline is saved with `joblib`, and a Streamlit app loads it for predictions. The app is hosted on Streamlit Community Cloud at https://student-performance-karthik.streamlit.app (Section 12.2).
 
 **Why cross-validation?** With only 79 test students, a single split is noisy and can rank models by chance (Section 9.3 shows a real example). Making every decision with 5-fold CV and touching the test set only once gives an honest final estimate.
 
@@ -454,7 +455,7 @@ The baseline has the highest accuracy while detecting **no** failing students, w
 ## 10. Conclusion & Limitations
 
 ### 10.1 Conclusion
-This project delivers a complete, reproducible machine-learning workflow for predicting students' final Mathematics grades from background information. A tuned Random Forest was selected through a fair, leakage-free comparison of five models (test MAE 3.04, RMSE 3.76, R² 0.31). It clearly outperforms the baseline, the linear models and the single decision tree. Past failures and absences are the most important predictors. The analysis also revealed that students with a final grade of 0 form a distinct group that the model cannot predict well. The trained pipeline is deployed in a Streamlit application. The model can serve as a rough, explainable early-warning signal, but its moderate accuracy means it should support teachers' judgement, never replace it.
+This project delivers a complete, reproducible machine-learning workflow for predicting students' final Mathematics grades from background information. A tuned Random Forest was selected through a fair, leakage-free comparison of five models (test MAE 3.04, RMSE 3.76, R² 0.31). It clearly outperforms the baseline, the linear models and the single decision tree. Past failures and absences are the most important predictors. The analysis also revealed that students with a final grade of 0 form a distinct group that the model cannot predict well. The trained pipeline is deployed as a public Streamlit web application (https://student-performance-karthik.streamlit.app). The model can serve as a rough, explainable early-warning signal, but its moderate accuracy means it should support teachers' judgement, never replace it.
 
 ### 10.2 Limitations
 - **Small sample:** only 395 students (79 in the test set), so the metrics carry noticeable uncertainty (CV RMSE standard deviation ≈ 0.37).
@@ -469,7 +470,7 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 - Combine the Mathematics and Portuguese datasets (649 more students).
 - Try gradient boosting and SHAP explanations, and use repeated or nested cross-validation.
 - Run a fairness audit of errors by gender, address and school.
-- Add K-Means clustering with PCA (syllabus Unit V) and deploy the app on Streamlit Community Cloud.
+- Add K-Means clustering with PCA (syllabus Unit V) to explore student profiles.
 
 ## 11. References
 1. P. Cortez and A. Silva, "Using Data Mining to Predict Secondary School Student Performance," in *Proc. 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008)*, Porto, Portugal: EUROSIS, 2008, pp. 5–12.
@@ -545,6 +546,19 @@ This project delivers a complete, reproducible machine-learning workflow for pre
 ![GitHub commits](evidence/github_commits.png)
 
 *Figure 22. Commit history with descriptive messages (screenshot captured 12 Nov 2026, 14:07 IST).*
+
+</div>
+
+### 12.2 Live Streamlit web application
+- **App URL:** https://student-performance-karthik.streamlit.app
+- **Hosting:** Streamlit Community Cloud, deployed directly from the GitHub repository (`app.py`, branch `docs/pdf-report`).
+- **Features:** a validated form for all 30 model inputs, the predicted final grade with grade band and typical error range (± test MAE), the most influential features, a model-performance tab, and a dataset tab.
+
+<div class="fig" markdown="1">
+
+![Live Streamlit app](evidence/streamlit_app.png)
+
+*Figure 23. The deployed Streamlit application (screenshot captured 12 Nov 2026, 15:34 IST).*
 
 </div>
 
