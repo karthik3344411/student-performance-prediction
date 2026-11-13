@@ -6,10 +6,11 @@ Predict a student's **final Mathematics grade (G3, 0–20)** from personal, fami
 
 | | |
 |---|---|
+| **🚀 Live app** | **https://student-performance-karthik.streamlit.app** |
 | **Final model** | Random Forest Regressor (tuned with GridSearchCV) |
 | **Test MAE / RMSE / R²** | **3.04 / 3.76 / 0.31** (baseline: 3.65 / 4.55 / −0.01) |
 | **Dataset** | UCI Student Performance – `student-mat.csv` (395 students, 33 columns) |
-| **Report** | [reports/project_report.md](reports/project_report.md) |
+| **Report** | [PDF](reports/Project_Report.pdf) · [Markdown](reports/project_report.md) |
 | **Notebook** | [notebooks/student_performance_analysis.ipynb](notebooks/student_performance_analysis.ipynb) |
 | **Viva preparation** | [VIVA_QUESTIONS.md](VIVA_QUESTIONS.md) |
 
@@ -69,7 +70,8 @@ student-performance-prediction/
 ├── tests/                        # pytest: preprocessing, prediction, app smoke test
 ├── app.py                        # Streamlit application
 ├── VIVA_QUESTIONS.md
-├── requirements.txt
+├── requirements.txt              # app + scripts
+├── requirements-dev.txt          # + pytest, notebook, PDF build
 └── LICENSE
 ```
 
@@ -79,8 +81,9 @@ git clone https://github.com/karthik3344411/student-performance-prediction.git
 cd student-performance-prediction
 python -m venv .venv
 .\.venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # everything (app + tests + notebook + PDF build)
 ```
+`requirements.txt` alone contains only what the scripts and the Streamlit app need (this is what Streamlit Community Cloud installs).
 (macOS/Linux: `source .venv/bin/activate`)
 
 ## 7. How to run
@@ -125,6 +128,10 @@ Best hyperparameters: `n_estimators=200, max_features=0.5, max_depth=None, min_s
 Logistic Regression was chosen by CV macro-F1 (0.65); on the test set: accuracy 0.60, recall for *fail* 0.46, ROC-AUC 0.60. The "always pass" baseline has higher accuracy (0.67) but finds **no** failing students – a good example of why accuracy alone is misleading on imbalanced data.
 
 ## 9. Streamlit app
+**Try it online:** https://student-performance-karthik.streamlit.app (hosted on Streamlit Community Cloud) – or run it locally with `streamlit run app.py`.
+
+![Streamlit app](reports/evidence/streamlit_app.png)
+
 Form with all 30 model inputs (grouped into Personal / Family / School & study / Lifestyle) → predicted G3, grade band, typical error range and the most influential features. A second tab shows model metrics and plots. The app shows a clear error if `models/best_model.joblib` is missing, validates inputs, and shows the raw model output if it ever had to be limited to 0–20.
 
 ## 10. Limitations
@@ -142,7 +149,8 @@ Form with all 30 model inputs (grouped into Personal / Family / School & study /
 
 ## 12. Evidence links
 - GitHub repository: https://github.com/karthik3344411/student-performance-prediction
-- LinkedIn post: _add link after publishing_
+- Live Streamlit app: https://student-performance-karthik.streamlit.app
+- LinkedIn post: https://www.linkedin.com/feed/update/urn:li:activity:7526586805312258048/
 
 ## 13. License
 Code: MIT (see [LICENSE](LICENSE)). Dataset: UCI Machine Learning Repository, CC BY 4.0.
