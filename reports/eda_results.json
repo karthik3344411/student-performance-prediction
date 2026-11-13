@@ -1,0 +1,397 @@
+{
+  "g3_mean_ci95": {
+    "mean": 10.415189873417722,
+    "low": 9.96199193703422,
+    "high": 10.868387809801224
+  },
+  "g3_shapiro": {
+    "W": 0.928729849872698,
+    "p_value": 8.835916843805374e-13
+  },
+  "ttest_g3_by_sex": {
+    "mean_F": 9.966346153846153,
+    "mean_M": 10.914438502673796,
+    "n_F": 208,
+    "n_M": 187,
+    "t_stat": -2.0650572003629564,
+    "p_value": 0.03957700303089975
+  },
+  "anova_g3_by_studytime": {
+    "group_means": {
+      "1": 10.047619047619047,
+      "2": 10.171717171717171,
+      "3": 11.4,
+      "4": 11.25925925925926
+    },
+    "group_sizes": {
+      "1": 105,
+      "2": 198,
+      "3": 65,
+      "4": 27
+    },
+    "F_stat": 1.7278351054436039,
+    "anova_p_value": 0.1607228096836598,
+    "kruskal_H": 7.578856181381842,
+    "kruskal_p_value": 0.055566544434365706
+  },
+  "kruskal_g3_by_failures": {
+    "group_means": {
+      "0": 11.253205128205128,
+      "1": 8.12,
+      "2": 6.235294117647059,
+      "3": 5.6875
+    },
+    "group_sizes": {
+      "0": 312,
+      "1": 50,
+      "2": 17,
+      "3": 16
+    },
+    "H_stat": 53.11507005042824,
+    "p_value": 1.7326673682737874e-11
+  },
+  "correlations_with_g3": {
+    "age": {
+      "spearman_rho": -0.17343754686136573,
+      "p_value": 0.0005354721839153027,
+      "pearson_r": -0.16157943813834058
+    },
+    "Medu": {
+      "spearman_rho": 0.2250358528745645,
+      "p_value": 6.290448010609436e-06,
+      "pearson_r": 0.21714749613860598
+    },
+    "Fedu": {
+      "spearman_rho": 0.17004900082627797,
+      "p_value": 0.0006895636032614371,
+      "pearson_r": 0.15245693890425902
+    },
+    "traveltime": {
+      "spearman_rho": -0.12053038660352437,
+      "p_value": 0.016545913756784086,
+      "pearson_r": -0.11714205281614902
+    },
+    "studytime": {
+      "spearman_rho": 0.10516968678133246,
+      "p_value": 0.036673582871214104,
+      "pearson_r": 0.09781968965319626
+    },
+    "failures": {
+      "spearman_rho": -0.361223517700282,
+      "p_value": 1.2818799782347257e-13,
+      "pearson_r": -0.3604149404616497
+    },
+    "famrel": {
+      "spearman_rho": 0.05497687081409259,
+      "p_value": 0.27571074655736877,
+      "pearson_r": 0.051363428881282154
+    },
+    "freetime": {
+      "spearman_rho": -0.004993740953811285,
+      "p_value": 0.9211901023094022,
+      "pearson_r": 0.011307240308313024
+    },
+    "goout": {
+      "spearman_rho": -0.1661187496045088,
+      "p_value": 0.0009192641404671132,
+      "pearson_r": -0.13279147350332923
+    },
+    "Dalc": {
+      "spearman_rho": -0.12094448004589974,
+      "p_value": 0.01617510021028091,
+      "pearson_r": -0.05466004056673598
+    },
+    "Walc": {
+      "spearman_rho": -0.10445859969861528,
+      "p_value": 0.037970377961224634,
+      "pearson_r": -0.05193932374224616
+    },
+    "health": {
+      "spearman_rho": -0.047789506549450154,
+      "p_value": 0.34347118660157205,
+      "pearson_r": -0.06133460487712137
+    },
+    "absences": {
+      "spearman_rho": 0.017730669122425113,
+      "p_value": 0.7253626110680622,
+      "pearson_r": 0.03424731615006931
+    }
+  },
+  "g3_zero_analysis": {
+    "n_zero": 38,
+    "share_zero_with_zero_absences": 1.0,
+    "share_nonzero_with_zero_absences": 0.21568627450980393,
+    "mean_failures_zero": 0.9210526315789473,
+    "mean_failures_nonzero": 0.27170868347338933,
+    "n_zero_with_g2_above_0": 25,
+    "absences_spearman_rho_g3_gt0": -0.244196948637836,
+    "absences_spearman_p_g3_gt0": 3.031825957781471e-06
+  },
+  "chi2_higher_vs_pass": {
+    "table": {
+      "no": {
+        "fail": 13,
+        "pass": 7
+      },
+      "yes": {
+        "fail": 117,
+        "pass": 258
+      }
+    },
+    "chi2": 8.353141630382195,
+    "dof": 1,
+    "p_value": 0.003850210443867274,
+    "pass_rate_higher_yes": 0.688,
+    "pass_rate_higher_no": 0.35
+  },
+  "group_means_g3": {
+    "sex": {
+      "F": {
+        "mean": 9.966346153846153,
+        "n": 208
+      },
+      "M": {
+        "mean": 10.914438502673796,
+        "n": 187
+      }
+    },
+    "address": {
+      "R": {
+        "mean": 9.511363636363637,
+        "n": 88
+      },
+      "U": {
+        "mean": 10.674267100977199,
+        "n": 307
+      }
+    },
+    "internet": {
+      "no": {
+        "mean": 9.409090909090908,
+        "n": 66
+      },
+      "yes": {
+        "mean": 10.617021276595745,
+        "n": 329
+      }
+    },
+    "higher": {
+      "no": {
+        "mean": 6.8,
+        "n": 20
+      },
+      "yes": {
+        "mean": 10.608,
+        "n": 375
+      }
+    },
+    "schoolsup": {
+      "no": {
+        "mean": 10.561046511627907,
+        "n": 344
+      },
+      "yes": {
+        "mean": 9.431372549019608,
+        "n": 51
+      }
+    },
+    "paid": {
+      "no": {
+        "mean": 9.985981308411215,
+        "n": 214
+      },
+      "yes": {
+        "mean": 10.922651933701658,
+        "n": 181
+      }
+    },
+    "romantic": {
+      "no": {
+        "mean": 10.836501901140684,
+        "n": 263
+      },
+      "yes": {
+        "mean": 9.575757575757576,
+        "n": 132
+      }
+    },
+    "school": {
+      "GP": {
+        "mean": 10.489971346704872,
+        "n": 349
+      },
+      "MS": {
+        "mean": 9.847826086956522,
+        "n": 46
+      }
+    }
+  },
+  "descriptive_statistics": {
+    "age": {
+      "mean": 16.7,
+      "median": 17.0,
+      "std": 1.28,
+      "min": 15,
+      "max": 22
+    },
+    "Medu": {
+      "mean": 2.75,
+      "median": 3.0,
+      "std": 1.09,
+      "min": 0,
+      "max": 4
+    },
+    "Fedu": {
+      "mean": 2.52,
+      "median": 2.0,
+      "std": 1.09,
+      "min": 0,
+      "max": 4
+    },
+    "traveltime": {
+      "mean": 1.45,
+      "median": 1.0,
+      "std": 0.7,
+      "min": 1,
+      "max": 4
+    },
+    "studytime": {
+      "mean": 2.04,
+      "median": 2.0,
+      "std": 0.84,
+      "min": 1,
+      "max": 4
+    },
+    "failures": {
+      "mean": 0.33,
+      "median": 0.0,
+      "std": 0.74,
+      "min": 0,
+      "max": 3
+    },
+    "famrel": {
+      "mean": 3.94,
+      "median": 4.0,
+      "std": 0.9,
+      "min": 1,
+      "max": 5
+    },
+    "freetime": {
+      "mean": 3.24,
+      "median": 3.0,
+      "std": 1.0,
+      "min": 1,
+      "max": 5
+    },
+    "goout": {
+      "mean": 3.11,
+      "median": 3.0,
+      "std": 1.11,
+      "min": 1,
+      "max": 5
+    },
+    "Dalc": {
+      "mean": 1.48,
+      "median": 1.0,
+      "std": 0.89,
+      "min": 1,
+      "max": 5
+    },
+    "Walc": {
+      "mean": 2.29,
+      "median": 2.0,
+      "std": 1.29,
+      "min": 1,
+      "max": 5
+    },
+    "health": {
+      "mean": 3.55,
+      "median": 4.0,
+      "std": 1.39,
+      "min": 1,
+      "max": 5
+    },
+    "absences": {
+      "mean": 5.71,
+      "median": 4.0,
+      "std": 8.0,
+      "min": 0,
+      "max": 75
+    },
+    "G1": {
+      "mean": 10.91,
+      "median": 11.0,
+      "std": 3.32,
+      "min": 3,
+      "max": 19
+    },
+    "G2": {
+      "mean": 10.71,
+      "median": 11.0,
+      "std": 3.76,
+      "min": 0,
+      "max": 19
+    },
+    "G3": {
+      "mean": 10.42,
+      "median": 11.0,
+      "std": 4.58,
+      "min": 0,
+      "max": 20
+    }
+  },
+  "outliers_iqr": {
+    "age": {
+      "count": 1,
+      "values": [
+        22
+      ]
+    },
+    "failures": {
+      "count": 83,
+      "values": [
+        1,
+        2,
+        3
+      ]
+    },
+    "absences": {
+      "count": 15,
+      "values": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        28,
+        30,
+        38,
+        40,
+        54,
+        56,
+        75
+      ]
+    },
+    "G3": {
+      "count": 0,
+      "values": []
+    }
+  },
+  "n_students_g3_zero": 38,
+  "n_students": 395,
+  "figures": [
+    "01_g3_distribution.png",
+    "02_gender_distribution.png",
+    "03_studytime_distribution.png",
+    "04_absences_distribution.png",
+    "05_outlier_boxplots.png",
+    "06_g3_by_studytime.png",
+    "07_g3_by_gender.png",
+    "08_absences_vs_g3.png",
+    "09_failures_vs_g3.png",
+    "10_correlation_heatmap.png",
+    "11_g3_studytime_gender.png",
+    "12_g3_higher_failures.png"
+  ]
+}
